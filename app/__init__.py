@@ -33,6 +33,7 @@ def create_app(config_class=None):
     # Initialize extensions
     CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
     socketio.init_app(app, cors_allowed_origins="*")
+    logger.info("Extensions initialized (CORS, SocketIO)")
     
     # Register blueprints
     from app.routes import auth, friends, search, health
@@ -40,20 +41,23 @@ def create_app(config_class=None):
     app.register_blueprint(friends.bp)
     app.register_blueprint(search.bp)
     app.register_blueprint(health.bp)
+    logger.info("Blueprints registered")
     
     # Register error handlers
     register_error_handlers(app)
+    logger.info("Error handlers registered")
     
     # Register socket events
     register_socket_events()
-    
-    logger.info("Application initialized")
+    logger.info("Socket events registered")
     
     @app.route('/')
     def index():
         from flask import render_template
         return render_template('index.html')
-        
+    logger.info("Root route registered")
+    
+    logger.info("Application factory completed successfully")
     return app
 
 def register_error_handlers(app):
