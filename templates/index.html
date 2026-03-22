@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BT Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <link rel="stylesheet" href="/static/css/style.css"/>
+</head>
+<body>
+
+  <!-- ─── TOAST CONTAINER ─── -->
+  <div id="toast-container" aria-live="polite"></div>
+
+  <!-- ─── AUTH SCREEN ─── -->
+  <div id="auth-screen" class="auth-screen">
+    <div class="auth-bg">
+      <div class="auth-grid"></div>
+      <div class="auth-orb orb-1"></div>
+      <div class="auth-orb orb-2"></div>
+    </div>
+    <div class="auth-card">
+      <div class="auth-logo">
+        <span class="logo-icon"><i class="fa-solid fa-satellite-dish"></i></span>
+        <span class="logo-text">BT<em>Chat</em></span>
+      </div>
+
+      <!-- TAB SWITCHER -->
+      <div class="auth-tabs">
+        <button class="tab-btn active" data-tab="login">Sign In</button>
+        <button class="tab-btn" data-tab="register">Register</button>
+        <div class="tab-indicator"></div>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <div id="tab-login" class="auth-form active">
+        <div class="form-group">
+          <label for="login-btid">BT ID</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-at input-icon"></i>
+            <input type="text" id="login-btid" placeholder="your_btid" autocomplete="username" spellcheck="false"/>
+          </div>
+          <span class="field-error" id="login-btid-err"></span>
+        </div>
+        <div class="form-group">
+          <label for="login-pass">Password</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"/>
+            <button class="toggle-pass" tabindex="-1" aria-label="Show password"><i class="fa-regular fa-eye"></i></button>
+          </div>
+          <span class="field-error" id="login-pass-err"></span>
+        </div>
+        <button class="btn-primary" id="login-btn">
+          <span class="btn-label">Sign In</span>
+          <span class="btn-spinner hidden"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
+        </button>
+      </div>
+
+      <!-- REGISTER FORM -->
+      <div id="tab-register" class="auth-form">
+        <div class="form-group">
+          <label for="reg-btid">Choose a BT ID</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-at input-icon"></i>
+            <input type="text" id="reg-btid" placeholder="your_btid" autocomplete="off" spellcheck="false"/>
+            <span class="availability-indicator" id="btid-avail"></span>
+          </div>
+          <span class="field-error" id="reg-btid-err"></span>
+        </div>
+        <div class="form-group">
+          <label for="reg-pass">Password</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" id="reg-pass" placeholder="min. 6 characters" autocomplete="new-password"/>
+            <button class="toggle-pass" tabindex="-1" aria-label="Show password"><i class="fa-regular fa-eye"></i></button>
+          </div>
+          <span class="field-error" id="reg-pass-err"></span>
+        </div>
+        <div class="form-group">
+          <label for="reg-pass2">Confirm Password</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-shield-halved input-icon"></i>
+            <input type="password" id="reg-pass2" placeholder="••••••••" autocomplete="new-password"/>
+          </div>
+          <span class="field-error" id="reg-pass2-err"></span>
+        </div>
+        <button class="btn-primary" id="register-btn">
+          <span class="btn-label">Create Account</span>
+          <span class="btn-spinner hidden"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── MAIN APP ─── -->
+  <div id="app-screen" class="app-screen hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="user-info" id="user-info-header">
+          <div class="avatar-wrap">
+            <div class="avatar" id="my-avatar"></div>
+            <span class="status-dot online" id="my-status-dot"></span>
+          </div>
+          <div class="user-meta">
+            <span class="my-btid" id="my-btid-label"></span>
+            <span class="my-status-label">Online</span>
+          </div>
+        </div>
+        <div class="sidebar-actions">
+          <button class="icon-btn" id="search-toggle-btn" title="Search users"><i class="fa-solid fa-magnifying-glass"></i></button>
+          <button class="icon-btn" id="add-friend-btn" title="Add friend"><i class="fa-solid fa-user-plus"></i></button>
+          <button class="icon-btn" id="theme-toggle-btn" title="Toggle theme"><i class="fa-solid fa-circle-half-stroke"></i></button>
+          <button class="icon-btn" id="logout-btn" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
+        </div>
+      </div>
+
+      <!-- SEARCH BAR -->
+      <div class="search-bar-wrap hidden" id="search-bar-wrap">
+        <div class="input-wrapper">
+          <i class="fa-solid fa-magnifying-glass input-icon"></i>
+          <input type="text" id="global-search" placeholder="Search users…" autocomplete="off" spellcheck="false"/>
+          <button class="icon-btn-sm" id="search-close"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="search-results" id="search-results"></div>
+      </div>
+
+      <!-- PENDING REQUESTS BANNER -->
+      <div class="pending-banner hidden" id="pending-banner">
+        <i class="fa-solid fa-bell"></i>
+        <span id="pending-count-text">1 pending request</span>
+        <button class="link-btn" id="view-requests-btn">View</button>
+      </div>
+
+      <!-- FRIEND REQUESTS PANEL -->
+      <div class="requests-panel hidden" id="requests-panel">
+        <div class="panel-header">
+          <span>Friend Requests</span>
+          <button class="icon-btn-sm" id="close-requests-btn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="requests-list" id="requests-list"></div>
+      </div>
+
+      <!-- FRIENDS LIST -->
+      <div class="friends-section">
+        <div class="section-label">Messages</div>
+        <ul class="friends-list" id="friends-list">
+          <li class="empty-state">
+            <i class="fa-regular fa-comment-dots"></i>
+            <span>No conversations yet</span>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- SIDEBAR OVERLAY (mobile) -->
+    <div class="sidebar-overlay hidden" id="sidebar-overlay"></div>
+
+    <!-- MAIN CHAT AREA -->
+    <main class="chat-main" id="chat-main">
+
+      <!-- EMPTY STATE -->
+      <div class="chat-empty" id="chat-empty">
+        <div class="empty-illustration">
+          <i class="fa-solid fa-satellite-dish"></i>
+        </div>
+        <h2>Select a conversation</h2>
+        <p>Choose a friend from the sidebar to start chatting</p>
+      </div>
+
+      <!-- ACTIVE CHAT -->
+      <div class="chat-view hidden" id="chat-view">
+
+        <!-- CHAT HEADER -->
+        <div class="chat-header">
+          <button class="icon-btn mobile-back-btn" id="mobile-back-btn"><i class="fa-solid fa-arrow-left"></i></button>
+          <div class="chat-peer-info">
+            <div class="avatar-wrap">
+              <div class="avatar" id="chat-peer-avatar"></div>
+              <span class="status-dot" id="chat-peer-status-dot"></span>
+            </div>
+            <div class="peer-meta">
+              <span class="peer-btid" id="chat-peer-btid"></span>
+              <span class="peer-status" id="chat-peer-status">Offline</span>
+            </div>
+          </div>
+          <div class="chat-header-actions">
+            <button class="icon-btn" title="Search in chat" id="chat-search-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
+            <button class="icon-btn" title="Voice call (coming soon)" disabled><i class="fa-solid fa-phone"></i></button>
+            <button class="icon-btn" title="Video call (coming soon)" disabled><i class="fa-solid fa-video"></i></button>
+            <button class="icon-btn" title="More options" id="chat-more-btn"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+          </div>
+          <!-- DROPDOWN MENU -->
+          <div class="dropdown-menu hidden" id="chat-dropdown">
+            <button class="dropdown-item" id="dd-remove-friend"><i class="fa-solid fa-user-minus"></i> Remove Friend</button>
+            <button class="dropdown-item danger" id="dd-block-user"><i class="fa-solid fa-ban"></i> Block User</button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" id="dd-change-password"><i class="fa-solid fa-key"></i> Change Password</button>
+          </div>
+        </div>
+
+        <!-- IN-CHAT SEARCH -->
+        <div class="chat-search-bar hidden" id="chat-search-bar">
+          <div class="input-wrapper">
+            <i class="fa-solid fa-magnifying-glass input-icon"></i>
+            <input type="text" id="chat-search-input" placeholder="Search messages…" autocomplete="off"/>
+            <button class="icon-btn-sm" id="chat-search-close"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <span class="search-match-count" id="search-match-count"></span>
+        </div>
+
+        <!-- MESSAGES -->
+        <div class="messages-container" id="messages-container">
+          <div class="load-more-wrap" id="load-more-wrap">
+            <button class="btn-ghost" id="load-more-btn"><i class="fa-solid fa-chevron-up"></i> Load earlier messages</button>
+          </div>
+          <div class="messages-list" id="messages-list"></div>
+          <div class="typing-indicator hidden" id="typing-indicator">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+
+        <!-- INPUT BAR -->
+        <div class="input-bar">
+          <button class="icon-btn emoji-btn" id="emoji-btn" title="Emoji"><i class="fa-regular fa-face-smile"></i></button>
+          <div class="message-input-wrap">
+            <div class="message-input" id="message-input" contenteditable="true" data-placeholder="Message…" role="textbox" aria-multiline="true" aria-label="Message input"></div>
+          </div>
+          <button class="icon-btn" id="sound-toggle-btn" title="Sound notifications">
+            <i class="fa-solid fa-volume-high" id="sound-icon"></i>
+          </button>
+          <button class="send-btn" id="send-btn" title="Send" disabled>
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+          <!-- EMOJI PICKER PANEL -->
+          <div class="emoji-panel hidden" id="emoji-panel"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ─── MODALS ─── -->
+  <!-- Add Friend Modal -->
+  <div class="modal-backdrop hidden" id="add-friend-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <span>Add Friend</span>
+        <button class="icon-btn-sm modal-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>BT ID</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-at input-icon"></i>
+            <input type="text" id="add-friend-input" placeholder="friend_btid" autocomplete="off" spellcheck="false"/>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost modal-close">Cancel</button>
+        <button class="btn-primary" id="send-request-btn">Send Request</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Password Modal -->
+  <div class="modal-backdrop hidden" id="change-pass-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <span>Change Password</span>
+        <button class="icon-btn-sm modal-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Current Password</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" id="cp-current" placeholder="••••••••"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>New Password</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" id="cp-new" placeholder="min. 6 characters"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Confirm New Password</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-shield-halved input-icon"></i>
+            <input type="password" id="cp-confirm" placeholder="••••••••"/>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost modal-close">Cancel</button>
+        <button class="btn-primary" id="save-password-btn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Dialog -->
+  <div class="modal-backdrop hidden" id="confirm-modal">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <span id="confirm-title">Confirm</span>
+      </div>
+      <div class="modal-body">
+        <p id="confirm-message"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" id="confirm-cancel">Cancel</button>
+        <button class="btn-danger" id="confirm-ok">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SCRIPTS ─── -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js"></script>
+  <script src="/static/js/audio.js"></script>
+  <script src="/static/js/emoji-picker.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
