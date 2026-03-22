@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: bt-chat
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --worker-class eventlet -w 1 run:app
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: DB_NAME
+        value: chat_app
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FLASK_DEBUG
+        value: "false"
